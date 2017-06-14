@@ -12,6 +12,7 @@ import { OrderedMap } from './OrderedMap';
 import { List } from './List';
 import { Map } from './Map';
 import { Stack } from './Stack';
+import { Heap } from './Heap';
 import { OrderedSet } from './OrderedSet';
 import { Set } from './Set';
 import { Record } from './Record';
@@ -41,6 +42,7 @@ export default {
   OrderedMap: OrderedMap,
   List: List,
   Stack: Stack,
+  Heap: Heap,
   Set: Set,
   OrderedSet: OrderedSet,
 
@@ -72,6 +74,7 @@ export {
   OrderedMap,
   List,
   Stack,
+  Heap,
   Set,
   OrderedSet,
   Record,
