@@ -267,7 +267,8 @@ class HashBucketNode {
         : undefined;
     }
 
-    let results = removeFromSubqueue(
+    let newSubqueue, newHashRedirect;
+    [newSubqueue, newHashRedirect] = removeFromSubqueue(
       isMutable ? this._subqueue : this._subqueue.slice(),
       isMutable ? this._hashRedirect : this._hashRedirect.slice(),
       ptrRedirect,
@@ -277,18 +278,25 @@ class HashBucketNode {
     if (prevSubNode !== newSubNode) {
       SetRef(didAlter);
 
-      results = insertIntoSubqueue(results[0], results[1], newSubNode, depth);
+      [newSubqueue, newHashRedirect] = insertIntoSubqueue(
+          newSubqueue,
+          newHashRedirect,
+          newSubNode,
+          depth
+        );
+
+      if (newSubqueue.length == 1) {
+        return isMutable ? newSubqueue[0] : newSubqueue[0].copy();
+      }
+
       if (isMutable) {
         this.value = newSubNode ? newSubNode.value : undefined;
         this.priority = newSubNode ? newSubNode.priority : undefined;
       } else {
-        return new HashBucketNode(
-          ownerID,
-          depth,
-          results[0],
-          results[1]
-        );
+        return new HashBucketNode(ownerID, depth, newSubqueue, newHashRedirect);
       }
+    } else if (newSubqueue.length == 1) {
+      return isMutable ? newSubqueue[0] : newSubqueue[0].copy();
     }
 
     return this;
@@ -373,6 +381,14 @@ class ValueNode {
       ))
       .update(ownerID, depth, keyHash, key, pvEntry, didChangeSize, didAlter);
     }
+  }
+
+  iterate(fn, reverse) {
+    // preorder traversal
+  }
+
+  next(prevKey, nextKey, prevPriority, nextPriority) {
+
   }
 }
 
