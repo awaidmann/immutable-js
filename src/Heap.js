@@ -123,10 +123,6 @@ HeapPrototype.asImmutable = MapPrototype.asImmutable;
 HeapPrototype.wasAltered = MapPrototype.wasAltered;
 
 function makeHeap(size, root, ownerID, hash) {
-  console.log('makeHeap');
-  console.log(size);
-  console.log(root);
-
   const heap = Object.create(HeapPrototype);
   heap.size = size || 0;
   heap._root = root;
