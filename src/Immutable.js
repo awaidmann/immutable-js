@@ -10,6 +10,7 @@ import { OrderedMap } from './OrderedMap';
 import { List } from './List';
 import { Map } from './Map';
 import { Stack } from './Stack';
+import { PriorityQueue } from './PriorityQueue'
 import { OrderedSet } from './OrderedSet';
 import { Set } from './Set';
 import { Record } from './Record';
@@ -56,6 +57,7 @@ export default {
   OrderedMap: OrderedMap,
   List: List,
   Stack: Stack,
+  PriorityQueue: PriorityQueue,
   Set: Set,
   OrderedSet: OrderedSet,
 
@@ -103,6 +105,7 @@ export {
   OrderedMap,
   List,
   Stack,
+  PriorityQueue,
   Set,
   OrderedSet,
   Record,

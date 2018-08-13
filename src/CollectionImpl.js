@@ -54,6 +54,7 @@ import { List } from './List';
 import { Set } from './Set';
 import { OrderedSet } from './OrderedSet';
 import { Stack } from './Stack';
+import { PriorityQueue } from './PriorityQueue'
 import { Range } from './Range';
 import { KeyedSeq, IndexedSeq, SetSeq, ArraySeq } from './Seq';
 import {
@@ -165,6 +166,11 @@ mixin(Collection, {
   toStack() {
     // Use Late Binding here to solve the circular dependency.
     return Stack(isKeyed(this) ? this.valueSeq() : this);
+  },
+
+  toPriorityQueue() {
+    // Use Late Binding here to solve the circular dependency.
+    return PriorityQueue(isKeyed(this) ? this.valueSeq() : this);
   },
 
   toList() {
