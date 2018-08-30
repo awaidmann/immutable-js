@@ -1,6 +1,7 @@
 import { DELETE } from './TrieUtils';
 
 import { KeyedCollection } from './Collection';
+import { defaultComparator } from './Operations';
 
 import { setIn } from './methods/setIn';
 import { deleteIn } from './methods/deleteIn';
@@ -15,6 +16,13 @@ import { asImmutable } from './methods/asImmutable';
 import { wasAltered } from './methods/wasAltered';
 
 export class PriorityQueue extends KeyedCollection {
+  constructor(value, comparator) {
+    return value === null || value === undefined
+      ? emptyPriorityQueue(comparator)
+      : isPriorityQueue(value)
+        ? value
+        : emptyPriorityQueue(comparator);
+  }
 }
 
 export function isPriorityQueue(maybePriorityQueue) {
@@ -47,3 +55,24 @@ PQPrototype.mergeDeepIn = mergeDeepIn;
 PQPrototype.withMutations = withMutations;
 PQPrototype.wasAltered = wasAltered;
 PQPrototype.asImmutable = asImmutable;
+
+function makePriorityQueue(size, comparator, root, ownerID, hash) {
+  const pq = Object.create(PriorityQueue.prototype);
+  pq.size = size;
+  pq._comparator = comparator;
+  pq._root = root;
+  pq.__ownerID = ownerID;
+  pq.__hash = hash;
+  return pq;
+}
+
+let EMPTY_PRIORITY_QUEUE;
+export function emptyPriorityQueue(comparator) {
+  return (
+    EMPTY_PRIORITY_QUEUE ||
+    (EMPTY_PRIORITY_QUEUE = makePriorityQueue(
+      0,
+      comparator || defaultComparator
+    ))
+  );
+}

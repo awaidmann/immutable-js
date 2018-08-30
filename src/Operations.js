@@ -871,7 +871,7 @@ function cacheResultThrough() {
   return Seq.prototype.cacheResult.call(this);
 }
 
-function defaultComparator(a, b) {
+export function defaultComparator(a, b) {
   if (a === undefined && b === undefined) {
     return 0;
   }
