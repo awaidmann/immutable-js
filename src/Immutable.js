@@ -10,7 +10,7 @@ import { OrderedMap } from './OrderedMap';
 import { List } from './List';
 import { Map } from './Map';
 import { Stack } from './Stack';
-import { PriorityQueue } from './PriorityQueue'
+import { PriorityQueue } from './PriorityQueue';
 import { OrderedSet } from './OrderedSet';
 import { Set } from './Set';
 import { Record } from './Record';

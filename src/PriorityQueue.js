@@ -38,7 +38,9 @@ export class PriorityQueue extends KeyedCollection {
 }
 
 export function isPriorityQueue(maybePriorityQueue) {
-  return !!(maybePriorityQueue && maybePriorityQueue[IS_PRIORITY_QUEUE_SENTINEL]);
+  return !!(
+    maybePriorityQueue && maybePriorityQueue[IS_PRIORITY_QUEUE_SENTINEL]
+  );
 }
 
 PriorityQueue.isPriorityQueue = isPriorityQueue;
