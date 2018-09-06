@@ -1,4 +1,11 @@
-import { DELETE, MASK, NOT_SET } from './TrieUtils';
+import {
+  DELETE,
+  MASK,
+  NOT_SET,
+  CHANGE_LENGTH,
+  MakeRef,
+  SetRef,
+} from './TrieUtils';
 
 import { KeyedCollection } from './Collection';
 import { defaultComparator } from './Operations';
@@ -110,6 +117,7 @@ function updatePriorityQueue(pq, k, p, v) {
       v
     );
   } else {
+    const didChangeSize = MakeRef(CHANGE_LENGTH);
     newRoot = pq._root.update(
       pq.__ownerID,
       pq._comparator,
@@ -117,10 +125,10 @@ function updatePriorityQueue(pq, k, p, v) {
       undefined,
       k,
       p,
-      v
+      v,
+      didChangeSize
     );
-    // TODO: naive implementation, use didChangeSize in future
-    newSize = pq.size + (v === NOT_SET ? -1 : 1);
+    newSize = pq.size + (didChangeSize.value ? (v === NOT_SET ? -1 : 1) : 0);
   }
 
   return newRoot
@@ -150,7 +158,16 @@ class KeyedHeapNode {
     return this.kpvMap[idx] ? this.kpvMap[idx][1] || notSetValue : notSetValue;
   }
 
-  update(ownerID, comparator, shift, keyHash, key, priority, value) {
+  update(
+    ownerID,
+    comparator,
+    shift,
+    keyHash,
+    key,
+    priority,
+    value,
+    didChangeSize
+  ) {
     if (keyHash === undefined) {
       keyHash = hash(key);
     }
@@ -162,6 +179,8 @@ class KeyedHeapNode {
     if (removed && !pvEntry) {
       return this;
     }
+
+    (removed || !pvEntry) && SetRef(didChangeSize);
 
     const updateEntries = heapUpdateEntries(
       comparator,
