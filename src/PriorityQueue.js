@@ -202,15 +202,21 @@ class KeyedHeapNode {
       pvEntry ? pvEntry[0] : undefined
     );
 
+    const newMap = updateMapFromEntries(
+      this.kpvMap.slice(),
+      updateEntries,
+      idxForShiftedKeyHash(shift),
+      idx,
+      value
+    );
+
+    if (removed) {
+      newMap[idx] = undefined;
+    }
+
     return new KeyedHeapNode(
       ownerID,
-      updateMapFromEntries(
-        this.kpvMap.slice(),
-        updateEntries,
-        idxForShiftedKeyHash(shift),
-        idx,
-        value
-      ),
+      newMap,
       updateHeapFromEntries(this.pkHeap.slice(), updateEntries)
     );
   }

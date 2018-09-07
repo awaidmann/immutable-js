@@ -60,6 +60,7 @@ describe('PriorityQueue', () => {
   });
 
   it('maintains priority property under deletes', () => {
+    const notSet = {};
     let pq = PriorityQueue()
       .set('a', 0, 'A')
       .set('b', 1, 'B')
@@ -71,13 +72,12 @@ describe('PriorityQueue', () => {
     pq = pq.delete('a');
     expect(pq.size).toBe(2);
     expect(pq.first()).toEqual('B');
-
-    pq = pq.delete('b');
-    expect(pq.size).toBe(1);
-    expect(pq.first()).toEqual('C');
+    expect(pq.get('a', notSet)).toEqual(notSet);
 
     pq = pq.delete('c');
-    expect(pq.size).toBe(0);
+    expect(pq.size).toBe(1);
+    expect(pq.first()).toEqual('B');
+    expect(pq.get('c', notSet)).toEqual(notSet);
   });
 
   it('maintains priority property under pop', () => {
