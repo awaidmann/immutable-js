@@ -45,8 +45,13 @@ export class PriorityQueue extends KeyedCollection {
   set(k, p, v) {
     return updatePriorityQueue(this, k, p, v);
   }
+
   remove(k) {
     return this.set(k, undefined, NOT_SET);
+  }
+
+  pop() {
+    return updatePriorityQueue(this, NOT_SET, undefined, NOT_SET);
   }
 }
 
@@ -168,6 +173,12 @@ class KeyedHeapNode {
     value,
     didChangeSize
   ) {
+    if (key === NOT_SET) {
+      // pop
+      if (!this.pkHeap.length) return;
+      key = this.pkHeap[0][1];
+    }
+
     if (keyHash === undefined) {
       keyHash = hash(key);
     }
