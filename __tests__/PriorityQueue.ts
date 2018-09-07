@@ -58,4 +58,25 @@ describe('PriorityQueue', () => {
     expect(pq.size).toBe(3);
     expect(pq.first()).toEqual('C');
   });
+
+  it('maintains priority property under deletes', () => {
+    let pq = PriorityQueue()
+      .set('a', 0, 'A')
+      .set('b', 1, 'B')
+      .set('c', 2, 'C');
+
+    expect(pq.size).toBe(3);
+    expect(pq.first()).toEqual('A');
+
+    pq = pq.delete('a');
+    expect(pq.size).toBe(2);
+    expect(pq.first()).toEqual('B');
+
+    pq = pq.delete('b');
+    expect(pq.size).toBe(1);
+    expect(pq.first()).toEqual('C');
+
+    pq = pq.delete('c');
+    expect(pq.size).toBe(0);
+  });
 });

@@ -45,6 +45,9 @@ export class PriorityQueue extends KeyedCollection {
   set(k, p, v) {
     return updatePriorityQueue(this, k, p, v);
   }
+  remove(k) {
+    return this.set(k, undefined, NOT_SET);
+  }
 }
 
 export function isPriorityQueue(maybePriorityQueue) {
