@@ -40,7 +40,7 @@ export class PriorityQueue extends KeyedCollection {
   }
 
   first(notSetValue) {
-    return this._root ? this._root.first(0) : notSetValue;
+    return this._root ? this._root.first(0, notSetValue) : notSetValue;
   }
 
   set(k, p, v) {
