@@ -3,6 +3,7 @@ import {
   MASK,
   NOT_SET,
   CHANGE_LENGTH,
+  DID_ALTER,
   MakeRef,
   SetRef,
 } from './TrieUtils';
@@ -123,6 +124,7 @@ function updatePriorityQueue(pq, k, p, v) {
     );
   } else {
     const didChangeSize = MakeRef(CHANGE_LENGTH);
+    const didAlter = MakeRef(DID_ALTER);
     newRoot = pq._root.update(
       pq.__ownerID,
       pq._comparator,
@@ -131,8 +133,12 @@ function updatePriorityQueue(pq, k, p, v) {
       k,
       p,
       v,
-      didChangeSize
+      didChangeSize,
+      didAlter
     );
+    if (!didAlter.value) {
+      return this;
+    }
     newSize = pq.size + (didChangeSize.value ? (v === NOT_SET ? -1 : 1) : 0);
   }
 
@@ -171,7 +177,8 @@ class KeyedHeapNode {
     key,
     priority,
     value,
-    didChangeSize
+    didChangeSize,
+    didAlter
   ) {
     if (key === NOT_SET) {
       // pop
@@ -191,6 +198,7 @@ class KeyedHeapNode {
       return this;
     }
 
+    SetRef(didAlter);
     (removed || !pvEntry) && SetRef(didChangeSize);
 
     const updateEntries = heapUpdateEntries(
