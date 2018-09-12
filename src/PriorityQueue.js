@@ -21,6 +21,7 @@ import { mergeDeep, mergeDeepWith } from './methods/mergeDeep';
 import { mergeIn } from './methods/mergeIn';
 import { mergeDeepIn } from './methods/mergeDeepIn';
 import { withMutations } from './methods/withMutations';
+import { asMutable } from './methods/asMutable';
 import { asImmutable } from './methods/asImmutable';
 import { wasAltered } from './methods/wasAltered';
 
@@ -54,6 +55,27 @@ export class PriorityQueue extends KeyedCollection {
   pop() {
     return updatePriorityQueue(this, NOT_SET, undefined, NOT_SET);
   }
+
+  __ensureOwner(ownerID) {
+    if (ownerID === this.__ownerID) {
+      return this;
+    }
+    if (!ownerID) {
+      if (this.size === 0) {
+        return emptyPriorityQueue();
+      }
+      this.__ownerID = ownerID;
+      this.__altered = false;
+      return this;
+    }
+    return makePriorityQueue(
+      this.size,
+      this._comparator,
+      this._root,
+      ownerID,
+      this.__hash
+    );
+  }
 }
 
 export function isPriorityQueue(maybePriorityQueue) {
@@ -83,6 +105,7 @@ PQPrototype.mergeDeepIn = mergeDeepIn;
 PQPrototype.withMutations = withMutations;
 PQPrototype.wasAltered = wasAltered;
 PQPrototype.asImmutable = asImmutable;
+PQPrototype['@@transducer/init'] = PQPrototype.asMutable = asMutable;
 
 function makePriorityQueue(size, comparator, root, ownerID, hash) {
   const pq = Object.create(PriorityQueue.prototype);
