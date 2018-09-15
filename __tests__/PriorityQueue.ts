@@ -100,4 +100,15 @@ describe('PriorityQueue', () => {
     pq = pq.pop();
     expect(pq.size).toBe(0);
   });
+
+  it('allows chained mutations', () => {
+    const pq1 = PriorityQueue();
+    const pq2 = pq1.withMutations(pq => pq.set('b', 1, 'B').set('a', 0, 'A'));
+
+    expect(pq1.size).toBe(0);
+    expect(pq2.size).toBe(2);
+    expect(pq2.first()).toEqual('A');
+    expect(pq2.get('a')).toEqual([0, 'A']);
+    expect(pq2.get('b')).toEqual([1, 'B']);
+  });
 });

@@ -165,6 +165,14 @@ function updatePriorityQueue(pq, k, p, v) {
     newSize = pq.size + (didChangeSize.value ? (v === NOT_SET ? -1 : 1) : 0);
   }
 
+  if (pq.__ownerID) {
+    pq.size = newSize;
+    pq._root = newRoot;
+    pq.__hash = undefined;
+    pq.__altered = true;
+    return pq;
+  }
+
   return newRoot
     ? makePriorityQueue(newSize, pq._comparator, newRoot)
     : emptyPriorityQueue();
@@ -233,8 +241,14 @@ class KeyedHeapNode {
       pvEntry ? pvEntry[0] : undefined
     );
 
+    const isEditable = ownerID && ownerID === this.ownerID;
+
+    const newHeap = updateHeapFromEntries(
+      isEditable ? this.pkHeap : this.pkHeap.slice(),
+      updateEntries
+    );
     const newMap = updateMapFromEntries(
-      this.kpvMap.slice(),
+      isEditable ? this.kpvMap : this.kpvMap.slice(),
       updateEntries,
       idxForShiftedKeyHash(shift),
       idx,
@@ -245,11 +259,7 @@ class KeyedHeapNode {
       newMap[idx] = undefined;
     }
 
-    return new KeyedHeapNode(
-      ownerID,
-      newMap,
-      updateHeapFromEntries(this.pkHeap.slice(), updateEntries)
-    );
+    return isEditable ? this : new KeyedHeapNode(ownerID, newMap, newHeap);
   }
 }
 
