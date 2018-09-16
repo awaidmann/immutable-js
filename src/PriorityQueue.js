@@ -195,7 +195,9 @@ class KeyedHeapNode {
       keyHash = hash(key);
     }
     const idx = idxForShiftedKeyHash(shift)(keyHash);
-    return this.kpvMap[idx] || notSetValue;
+    const mapEntry = this.kpvMap[idx];
+    const heapEntry = mapEntry ? this.pkHeap[mapEntry[0]] : undefined;
+    return heapEntry ? [heapEntry[0], mapEntry[1]] : notSetValue;
   }
 
   first(shift, notSetValue) {

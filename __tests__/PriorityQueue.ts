@@ -17,6 +17,22 @@ describe('PriorityQueue', () => {
     expect(pq.get('b')).toEqual([1, 'B']);
     expect(pq.get('c')).toEqual([2, 'C']);
   });
+
+  it('constructor provides initial values with non-numeric priorities', () => {
+    const pq = PriorityQueue({
+      a: ['_a', 'A'],
+      b: ['_b', 'B'],
+      c: ['_c', 'C'],
+    });
+
+    expect(pq.size).toBe(3);
+    expect(pq.first()).toEqual('A');
+    expect(pq.get('a')).toEqual(['_a', 'A']);
+    expect(pq.get('b')).toEqual(['_b', 'B']);
+    expect(pq.get('c')).toEqual(['_c', 'C']);
+  });
+
+  it('constructor is identity when provided priority queue', () => {
     const pq1 = PriorityQueue({ a: [0, 'A'], b: [1, 'B'], c: [2, 'C'] });
     const pq2 = PriorityQueue(pq1);
     expect(pq2).toBe(pq1);
