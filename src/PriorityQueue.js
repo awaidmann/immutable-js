@@ -12,6 +12,7 @@ import { KeyedCollection } from './Collection';
 import { defaultComparator } from './Operations';
 
 import { hash } from './Hash';
+import assertNotInfinite from './utils/assertNotInfinite';
 import { setIn } from './methods/setIn';
 import { deleteIn } from './methods/deleteIn';
 import { update } from './methods/update';
@@ -31,7 +32,11 @@ export class PriorityQueue extends KeyedCollection {
       ? emptyPriorityQueue(comparator)
       : isPriorityQueue(value)
         ? value
-        : emptyPriorityQueue(comparator);
+        : emptyPriorityQueue(comparator).withMutations(pq => {
+            const iter = KeyedCollection(value);
+            assertNotInfinite(iter.size);
+            iter.forEach((v, k) => pq.set(k, v[0], v[1]));
+          });
   }
 
   get(k, notSetValue) {
