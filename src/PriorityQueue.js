@@ -264,6 +264,7 @@ class KeyedHeapNode {
 
     if (removed) {
       newMap[idx] = undefined;
+      newHeap.pop();
     }
 
     return isEditable ? this : new KeyedHeapNode(ownerID, newMap, newHeap);
