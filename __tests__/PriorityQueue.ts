@@ -39,10 +39,7 @@ describe('PriorityQueue', () => {
   });
 
   it('gets [priority, value] entry by key', () => {
-    const pq = PriorityQueue()
-      .set('a', 0, 'A')
-      .set('b', 1, 'B')
-      .set('c', 2, 'C');
+    const pq = PriorityQueue({ a: [0, 'A'], b: [1, 'B'], c: [2, 'C'] });
 
     expect(pq.size).toBe(3);
     expect(pq.get('a')).toEqual([0, 'A']);
@@ -51,7 +48,7 @@ describe('PriorityQueue', () => {
   });
 
   it('maintains priority property under sets', () => {
-    let pq = PriorityQueue().set('b', 1, 'B');
+    let pq = PriorityQueue({ b: [1, 'B'] });
 
     expect(pq.size).toBe(1);
     expect(pq.first()).toEqual('B');
@@ -66,10 +63,7 @@ describe('PriorityQueue', () => {
   });
 
   it('maintains priority property under updates', () => {
-    let pq = PriorityQueue()
-      .set('a', 0, 'A')
-      .set('b', 1, 'B')
-      .set('c', 2, 'C');
+    let pq = PriorityQueue({ a: [0, 'A'], b: [1, 'B'], c: [2, 'C'] });
 
     expect(pq.size).toBe(3);
     expect(pq.first()).toEqual('A');
@@ -85,10 +79,7 @@ describe('PriorityQueue', () => {
 
   it('maintains priority property under deletes', () => {
     const notSet = {};
-    let pq = PriorityQueue()
-      .set('a', 0, 'A')
-      .set('b', 1, 'B')
-      .set('c', 2, 'C');
+    let pq = PriorityQueue({ a: [0, 'A'], b: [1, 'B'], c: [2, 'C'] });
 
     expect(pq.size).toBe(3);
     expect(pq.first()).toEqual('A');
@@ -105,10 +96,7 @@ describe('PriorityQueue', () => {
   });
 
   it('maintains priority property under pop', () => {
-    let pq = PriorityQueue()
-      .set('a', 0, 'A')
-      .set('b', 1, 'B')
-      .set('c', 2, 'C');
+    let pq = PriorityQueue({ a: [0, 'A'], b: [1, 'B'], c: [2, 'C'] });
 
     expect(pq.size).toBe(3);
     expect(pq.first()).toEqual('A');
