@@ -8,6 +8,7 @@ import {
   SetRef,
 } from './TrieUtils';
 
+import { is } from './is';
 import { KeyedCollection } from './Collection';
 import { defaultComparator } from './Operations';
 
@@ -268,6 +269,61 @@ class KeyedHeapNode {
     }
 
     return isEditable ? this : new KeyedHeapNode(ownerID, newMap, newHeap);
+  }
+}
+
+class ValueNode {
+  constructor(ownerID, keyHash, key, priority, value) {
+    this.ownerID = ownerID;
+    this.keyHash = keyHash;
+    this.key = key;
+    this.priority = priority;
+    this.value = value;
+  }
+
+  get(shift, keyHash, key, notSetValue) {
+    return is(key, this.key) ? [this.priority, this.value] : notSetValue;
+  }
+
+  first(shift, notSetValue) {
+    return this.value || notSetValue;
+  }
+
+  update(
+    ownerID,
+    comparator,
+    shift,
+    keyHash,
+    key,
+    priority,
+    value,
+    didChangeSize,
+    didAlter
+  ) {
+    const removed = value === NOT_SET;
+    const keyMatch = is(key, this.key);
+
+    if ((keyMatch && priority === this.priority && value === this.value) || removed) {
+      return this;
+    }
+
+    SetRef(didAlter);
+    if (removed) {
+      SetRef(didChangeSize);
+      return;
+    }
+
+    if (keyMatch) {
+      if (ownerID && ownerID === this.ownerID) {
+        this.priority = priority;
+        this.value = value;
+        return this;
+      }
+      return new ValueNode(ownerID, this.keyHash, key, priority, value);
+    }
+
+    // TODO: integrate with other node types
+    return this;
   }
 }
 
