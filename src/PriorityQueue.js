@@ -1,5 +1,6 @@
 import {
   DELETE,
+  SHIFT,
   MASK,
   NOT_SET,
   CHANGE_LENGTH,
@@ -196,16 +197,16 @@ class KeyedHeapNode {
       keyHash = hash(key);
     }
     const idx = idxForShiftedKeyHash(shift)(keyHash);
-    const mapEntry = this.kpvMap[idx];
-    const heapEntry = mapEntry ? this.pkHeap[mapEntry[0]] : undefined;
-    return heapEntry ? [heapEntry[0], mapEntry[1]] : notSetValue;
+    const node = this.pkHeap[this.kpvMap[idx]];
+    return node
+      ? node.get(shift + SHIFT, keyHash, key, notSetValue)
+      : notSetValue;
   }
 
   first(shift, notSetValue) {
-    if (!this.pkHeap.length) return;
-
-    const idx = idxForShiftedKeyHash(shift)(this.pkHeap[0][1]);
-    return this.kpvMap[idx] ? this.kpvMap[idx][1] || notSetValue : notSetValue;
+    return this.pkHeap[0]
+      ? this.pkHeap[0].first(shift + SHIFT, notSetValue)
+      : notSetValue;
   }
 
   update(
@@ -222,7 +223,7 @@ class KeyedHeapNode {
     if (key === NOT_SET) {
       // pop
       if (!this.pkHeap.length) return;
-      key = this.pkHeap[0][1];
+      key = this.pkHeap[0].key;
     }
 
     if (keyHash === undefined) {
@@ -231,14 +232,15 @@ class KeyedHeapNode {
 
     const idx = idxForShiftedKeyHash(shift)(keyHash);
     const removed = value === NOT_SET;
-    const pvEntry = this.kpvMap[idx];
+    const priorityIdx = this.kpvMap[idx];
+    const exists = !(priorityIdx === undefined || priorityIdx === null);
 
-    if (removed && !pvEntry) {
+    if (removed && !exists) {
       return this;
     }
 
     SetRef(didAlter);
-    (removed || !pvEntry) && SetRef(didChangeSize);
+    (removed || !exists) && SetRef(didChangeSize);
 
     const updateEntries = heapUpdateEntries(
       comparator,
@@ -246,21 +248,28 @@ class KeyedHeapNode {
       keyHash,
       key,
       priority,
-      pvEntry ? pvEntry[0] : undefined
+      value,
+      priorityIdx
     );
 
     const isEditable = ownerID && ownerID === this.ownerID;
 
     const newHeap = updateHeapFromEntries(
       isEditable ? this.pkHeap : this.pkHeap.slice(),
-      updateEntries
+      updateEntries,
+      update =>
+        new ValueNode(
+          ownerID,
+          update.keyHash,
+          update.key,
+          update.priority,
+          update.value
+        )
     );
     const newMap = updateMapFromEntries(
       isEditable ? this.kpvMap : this.kpvMap.slice(),
       updateEntries,
-      idxForShiftedKeyHash(shift),
-      idx,
-      value
+      idxForShiftedKeyHash(shift)
     );
 
     if (removed) {
@@ -303,7 +312,10 @@ class ValueNode {
     const removed = value === NOT_SET;
     const keyMatch = is(key, this.key);
 
-    if ((keyMatch && priority === this.priority && value === this.value) || removed) {
+    if (
+      (keyMatch && priority === this.priority && value === this.value) ||
+      removed
+    ) {
       return this;
     }
 
@@ -335,33 +347,35 @@ function idxForShiftedKeyHash(shift) {
 
 // Heap management
 
-function updateMapFromEntries(
-  map,
-  updateEntries,
-  idxForKeyHash,
-  keyHashIdx,
-  value
-) {
+function updateMapFromEntries(map, updateEntries, idxForKeyHash) {
   return updateEntries
     ? updateEntries.reduce((modMap, update) => {
-        const keyHash = update[1][1];
+        const keyHash = update[1].keyHash;
         const idx = idxForKeyHash(keyHash);
-        modMap[idx] = [update[0], idx === keyHashIdx ? value : modMap[idx][1]];
+        modMap[idx] = update[0];
         return modMap;
       }, map)
     : map;
 }
 
-function updateHeapFromEntries(heap, updateEntries) {
+function updateHeapFromEntries(heap, updateEntries, updateToNode) {
   return updateEntries
     ? updateEntries.reduce((modHeap, update) => {
-        modHeap[update[0]] = update[1];
+        modHeap[update[0]] = updateToNode(update[1]);
         return modHeap;
       }, heap)
     : heap;
 }
 
-function heapUpdateEntries(comparator, heap, keyHash, key, priority, idx) {
+function heapUpdateEntries(
+  comparator,
+  heap,
+  keyHash,
+  key,
+  priority,
+  value,
+  idx
+) {
   if (idx < 0 || idx >= heap.length) return heap;
 
   let heapUpdateIdxs = [];
@@ -370,11 +384,11 @@ function heapUpdateEntries(comparator, heap, keyHash, key, priority, idx) {
     !(priority === undefined || priority === null) &&
     !(keyHash === undefined || keyHash === null)
   ) {
-    const moving = [priority, keyHash, key];
+    const moving = { priority, keyHash, key, value };
     if (idx === undefined || idx === null) {
       heapUpdateIdxs = siftUp(comparator, heap, moving, heap.length);
     } else {
-      const compare = comparator(heap[idx][0], priority);
+      const compare = comparator(heap[idx].priority, priority);
       heapUpdateIdxs =
         compare > 0
           ? siftUp(comparator, heap, moving, idx)
@@ -406,7 +420,7 @@ function siftUp(comparator, heap, moving, movingIdx, updateIdxs) {
 
   const hasHeapProp =
     parentIdx > -1 && parentIdx < movingIdx && parent
-      ? comparator(parent[0], moving[0]) < 1
+      ? comparator(parent.priority, moving.priority) < 1
       : true;
 
   if (!hasHeapProp) {
@@ -429,8 +443,9 @@ function siftDown(comparator, heap, moving, movingIdx, updateIdxs) {
   for (let ii = range[0]; ii <= range[1]; ii++) {
     prevBest =
       heap[ii] !== undefined &&
-      comparator(moving[0], heap[ii][0]) > 0 &&
-      (prevBest === undefined || comparator(heap[prevBest][0], heap[ii][0]) > 0)
+      comparator(moving.priority, heap[ii].priority) > 0 &&
+      (prevBest === undefined ||
+        comparator(heap[prevBest].priority, heap[ii].priority) > 0)
         ? ii
         : prevBest;
   }
